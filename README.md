@@ -6,6 +6,15 @@ The post processor for an exported html by vscode reveal.
 
  - vscode-reveal 3.3.2
 
+# Usage
+
+1. export html file by vscode-reveal
+2. post process by this script
+
+```
+$ ./go-vscode-reveal-html-postprocessor -i /path/to/markdown.md -o /path/to/export
+```
+
 # Build requirement
 
  - dep

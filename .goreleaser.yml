@@ -1,0 +1,16 @@
+before:
+  # Templates for the commands to be ran.
+  hooks:
+    - dep ensure
+    - packr
+builds:
+  #  > How can I include two .go files in my .goreleaser.yml file? ： golang
+  #  > https://www.reddit.com/r/golang/comments/ay2r8p/how_can_i_include_two_go_files_in_my/ehy28zp/
+  - main: .
+    binary: go-vscode-reveal-html-postprocessor
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64

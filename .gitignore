@@ -33,3 +33,7 @@ vendor/
 output/
 !.gitkeep
 dist
+
+### Packr ###
+
+*packr.go

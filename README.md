@@ -26,7 +26,7 @@ $ ./go-vscode-reveal-html-postprocessor -i /path/to/markdown.md -o /path/to/expo
 
 ```
 // create tag, push tag, release
-git tag v0.0.1 && git push --tags && goreleaser
+git tag v0.0.1 && git push --tags && goreleaser --rm-dist
 ```
 
 # Delete tag

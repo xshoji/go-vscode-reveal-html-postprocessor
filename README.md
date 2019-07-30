@@ -21,3 +21,23 @@ $ ./go-vscode-reveal-html-postprocessor -i /path/to/markdown.md -o /path/to/expo
  - packr
  - goreleaser
  - go 1.12
+
+# Release
+
+```
+// create tag
+git tag v0.0.1
+
+// push tag
+git push --tags
+
+// release
+goreleaser
+```
+
+# Delete tag
+
+```
+git tag -d v0.0.1
+git push origin :v0.0.1
+```

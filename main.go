@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"github.com/gobuffalo/packr"
+	"github.com/jessevdk/go-flags"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,28 +15,33 @@ import (
 
 const PLACEHOLDER = "XXXXXXXXXX"
 
-var helpFlag = flag.Bool("help", false, "help")
-var inputMarkdownFlag = flag.String("input", "", "[required] Input file (.md) path.")
-var outputDirectoryFlag = flag.String("output", "", "[required] Output directory ( exported html directory by vscode-reveal ) path.")
-var removeHeaderLinesFlag = flag.Int("remove-header-lines", 7, "[optional] Remove header lines at markdown file..")
-var box = packr.NewBox("./font-awesome-4.7.0")
-
-func init() {
-	flag.BoolVar(helpFlag, "h", false, "= -help")
-	flag.StringVar(inputMarkdownFlag, "i", "", "= -input")
-	flag.StringVar(outputDirectoryFlag, "o", "", "= -output")
-	flag.IntVar(removeHeaderLinesFlag, "r", 7, "= -remove-header-lines")
+type options struct {
+	Input       string `short:"i" long:"input" description:"An input markdown file path." required:"true"`
+	Output      string `short:"o" long:"output" description:"An output html directory that exported by vscode-reveal." required:"true"`
+	Removelines int    `short:"r" long:"removelines" description:"Remove top lines of the markdown file." default:"7"`
 }
+
+var box = packr.NewBox("./font-awesome-4.7.0")
 
 func main() {
 
-	flag.Parse()
-	if *helpFlag || *inputMarkdownFlag == "" || *outputDirectoryFlag == "" {
-		flag.Usage()
-		os.Exit(0)
+	opts := *new(options)
+	parser := flags.NewParser(&opts, flags.Default)
+	// set name
+	parser.Name = "go-vscode-reveal-html-postprocessor"
+	if _, err := parser.Parse(); err != nil {
+		flagsError, _ := err.(*flags.Error)
+		// help時は何もしない
+		if flagsError.Type == flags.ErrHelp {
+			return
+		}
+		fmt.Println()
+		parser.WriteHelp(os.Stdout)
+		fmt.Println()
+		return
 	}
-	fmt.Println("input: ", *inputMarkdownFlag)
-	fmt.Println("outut: ", *outputDirectoryFlag)
+	fmt.Println("input: ", opts.Input)
+	fmt.Println("outut: ", opts.Output)
 
 	minCss, _ := box.Find("css/font-awesome.min.css")
 	webfontSvg, _ := box.Find("fonts/fontawesome-webfont.svg")
@@ -45,42 +50,42 @@ func main() {
 	webfontWoff, _ := box.Find("fonts/fontawesome-webfont.woff")
 	webfontEot, _ := box.Find("fonts/fontawesome-webfont.eot")
 
-	if !strings.HasSuffix(*inputMarkdownFlag, ".md") {
-		log.Fatal("<< ERROR >> " + *inputMarkdownFlag + " is not markdown file.")
+	if !strings.HasSuffix(opts.Input, ".md") {
+		log.Fatal("<< ERROR >> " + opts.Input + " is not markdown file.")
 		os.Exit(1)
 	}
 
-	if !Exists(*inputMarkdownFlag) {
-		log.Fatal("<< ERROR >> " + *inputMarkdownFlag + " is not exist.")
+	if !Exists(opts.Input) {
+		log.Fatal("<< ERROR >> " + opts.Input + " is not exist.")
 		os.Exit(1)
 	}
 
-	if !Exists(*outputDirectoryFlag) {
-		log.Fatal("<< ERROR >> " + *outputDirectoryFlag + " is not exist.")
+	if !Exists(opts.Output) {
+		log.Fatal("<< ERROR >> " + opts.Output + " is not exist.")
 		os.Exit(1)
 	}
 
-	if !Exists(filepath.Join(*outputDirectoryFlag, "index.html")) {
-		log.Fatal("<< ERROR >> index.html is not exist in " + *outputDirectoryFlag + ".")
+	if !Exists(filepath.Join(opts.Output, "index.html")) {
+		log.Fatal("<< ERROR >> index.html is not exist in " + opts.Output + ".")
 		os.Exit(1)
 	}
 
-	os.Mkdir(filepath.Join(*outputDirectoryFlag, "css"), 0777)
-	os.Mkdir(filepath.Join(*outputDirectoryFlag, "fonts"), 0777)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "css", "font-awesome.min.css"), minCss, 0777)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "fonts", "fontawesome-webfont.svg"), webfontSvg, 0777)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "fonts", "FontAwesome.otf"), otf, 0777)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "fonts", "fontawesome-webfont.woff2"), webfontWoff2, 0777)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "fonts", "fontawesome-webfont.woff"), webfontWoff, 0777)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "fonts", "fontawesome-webfont.eot"), webfontEot, 0777)
+	os.Mkdir(filepath.Join(opts.Output, "css"), 0777)
+	os.Mkdir(filepath.Join(opts.Output, "fonts"), 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "css", "font-awesome.min.css"), minCss, 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.svg"), webfontSvg, 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "fonts", "FontAwesome.otf"), otf, 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.woff2"), webfontWoff2, 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.woff"), webfontWoff, 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.eot"), webfontEot, 0777)
 
-	htmlBytes, _ := ioutil.ReadFile(filepath.Join(*outputDirectoryFlag, "index.html"))
+	htmlBytes, _ := ioutil.ReadFile(filepath.Join(opts.Output, "index.html"))
 	html := string(htmlBytes)
 	re := regexp.MustCompile(`(<section data-markdown="/markdown.md" data-separator="\^\[[\s\S]*</section>)`)
 	html = re.ReplaceAllString(html, PLACEHOLDER)
 	html = strings.Replace(html, `<link rel="stylesheet" href="libs/reveal.js/font-awesome-4.7.0/css/font-awesome.min.css">`, `<link rel="stylesheet" href="css/font-awesome.min.css">`, -1)
 
-	file, err := os.Open(*inputMarkdownFlag)
+	file, err := os.Open(opts.Input)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -90,7 +95,7 @@ func main() {
 	markdownString := ""
 	isTopEmptyLines := true
 	for scanner.Scan() {
-		if cnt < *removeHeaderLinesFlag {
+		if cnt < opts.Removelines {
 			cnt++
 			continue
 		}
@@ -116,7 +121,7 @@ func main() {
             </section>
 `
 	fixedHtml := strings.Replace(html, PLACEHOLDER, markdownHtml, -1)
-	ioutil.WriteFile(filepath.Join(*outputDirectoryFlag, "index.html"), []byte(fixedHtml), 0777)
+	ioutil.WriteFile(filepath.Join(opts.Output, "index.html"), []byte(fixedHtml), 0777)
 
 }
 

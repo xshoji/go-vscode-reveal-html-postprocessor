@@ -1,6 +1,8 @@
 # go-vscode-reveal-html-postprocessor
 
-The post processor for an exported html by vscode reveal.
+The post-processor for the exported html by vscode-reveal.
+
+go-vscode-reveal-html-postprocessor post-processes the index.html to be able to start as stand alone. As a result, your presentation will be distributable to other.
 
 # User requirement
 
@@ -8,12 +10,14 @@ The post processor for an exported html by vscode reveal.
 
 # Usage
 
-1. export html file by vscode-reveal
-2. post process by this script
+1. Export html and css, js files by vscode-reveal
+2. post process by [go-vscode-reveal-html-postprocessor](https://github.com/xshoji/go-vscode-reveal-html-postprocessor/releases)
 
 ```
 $ ./go-vscode-reveal-html-postprocessor -i /path/to/markdown.md -o /path/to/export
 ```
+
+3. Open index.html then you will be able to start your presentation on browser!
 
 # Build requirement
 

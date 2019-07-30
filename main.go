@@ -19,6 +19,7 @@ type options struct {
 	Input       string `short:"i" long:"input" description:"An input markdown file path." required:"true"`
 	Output      string `short:"o" long:"output" description:"An output html directory that exported by vscode-reveal." required:"true"`
 	Removelines int    `short:"r" long:"removelines" description:"Remove top lines of the markdown file." default:"7"`
+	ImageDir    string `short:"m" long:"imagedir" description:"An image file directory." default:""`
 }
 
 var box = packr.NewBox("./font-awesome-4.7.0")
@@ -56,17 +57,17 @@ func main() {
 	}
 
 	if !Exists(opts.Input) {
-		log.Fatal("<< ERROR >> " + opts.Input + " is not exist.")
+		log.Fatal("<< ERROR >> " + opts.Input + " doesn't exist.")
 		os.Exit(1)
 	}
 
 	if !Exists(opts.Output) {
-		log.Fatal("<< ERROR >> " + opts.Output + " is not exist.")
+		log.Fatal("<< ERROR >> " + opts.Output + " doesn't exist.")
 		os.Exit(1)
 	}
 
 	if !Exists(filepath.Join(opts.Output, "index.html")) {
-		log.Fatal("<< ERROR >> index.html is not exist in " + opts.Output + ".")
+		log.Fatal("<< ERROR >> index.html doesn't exist in " + opts.Output + ".")
 		os.Exit(1)
 	}
 
@@ -123,9 +124,46 @@ func main() {
 	fixedHtml := strings.Replace(html, PLACEHOLDER, markdownHtml, -1)
 	ioutil.WriteFile(filepath.Join(opts.Output, "index.html"), []byte(fixedHtml), 0777)
 
+	if Exists(opts.ImageDir) && opts.ImageDir != "" {
+		CopyDir(opts.ImageDir, opts.Output)
+	}
 }
 
 func Exists(name string) bool {
 	_, err := os.Stat(name)
 	return !os.IsNotExist(err)
+}
+
+func CopyDir(src string, dest string) {
+	// First, remove target directory
+	topDirName := filepath.Base(src)
+	destFilePath := filepath.Join(dest, topDirName)
+	os.RemoveAll(destFilePath)
+	os.Mkdir(destFilePath, 0777)
+	doCopyDir(src, destFilePath)
+}
+
+func doCopyDir(src string, dest string) {
+	files, err := ioutil.ReadDir(src)
+	if err != nil {
+		log.Fatal("<< ERROR >> " + src + " doesn't exist.")
+		os.Exit(1)
+	}
+
+	for _, file := range files {
+		srcFilePath := filepath.Join(src, file.Name())
+		destFilePath := filepath.Join(dest, file.Name())
+		if file.IsDir() {
+			os.Mkdir(destFilePath, 0777)
+			doCopyDir(srcFilePath, destFilePath)
+		} else {
+			// copy file
+			bytes, err := ioutil.ReadFile(srcFilePath)
+			if err != nil {
+				log.Fatal("<< ERROR >> " + srcFilePath + " cannot read.")
+				os.Exit(1)
+			}
+			ioutil.WriteFile(destFilePath, bytes, 0777)
+		}
+	}
 }

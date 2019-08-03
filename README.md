@@ -23,6 +23,8 @@ $ ./go-vscode-reveal-html-postprocessor -i /path/to/markdown.md -o /path/to/expo
 
 3. Open index.html then you will be able to start your presentation on browser!
 
+### Tool usage
+
 ```
 Usage:
   go-vscode-reveal-html-postprocessor [OPTIONS]

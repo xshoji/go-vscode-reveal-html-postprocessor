@@ -16,10 +16,12 @@ import (
 const PLACEHOLDER = "XXXXXXXXXX"
 
 type options struct {
-	Input       string `short:"i" long:"input" description:"An input markdown file path." required:"true"`
-	Output      string `short:"o" long:"output" description:"An output html directory that exported by vscode-reveal." required:"true"`
-	Removelines int    `short:"r" long:"removelines" description:"Remove top lines of the markdown file." default:"7"`
-	ImageDir    string `short:"m" long:"imagedir" description:"An image file directory." default:""`
+	Input                 string `short:"i" long:"input" description:"[ required ] An input markdown file path." required:"true"`
+	Output                string `short:"o" long:"output" description:"[ required ] An output html directory that exported by vscode-reveal." required:"true"`
+	RemoveLines           int    `short:"r" long:"removeLines" description:"Remove top lines of the markdown file." default:"7"`
+	DataSeparator         string `short:"d" long:"dataSeparator" description:"The data-separator." default:"---"`
+	DataSeparatorVertical string `short:"v" long:"dataSeparatorVertical" description:"The data-separator-vertical." default:"--"`
+	ImageDir              string `short:"m" long:"imageDir" description:"An image file directory." default:""`
 }
 
 var box = packr.NewBox("./font-awesome-4.7.0")
@@ -53,22 +55,18 @@ func main() {
 
 	if !strings.HasSuffix(opts.Input, ".md") {
 		log.Fatal("<< ERROR >> " + opts.Input + " is not markdown file.")
-		os.Exit(1)
 	}
 
 	if !Exists(opts.Input) {
 		log.Fatal("<< ERROR >> " + opts.Input + " doesn't exist.")
-		os.Exit(1)
 	}
 
 	if !Exists(opts.Output) {
 		log.Fatal("<< ERROR >> " + opts.Output + " doesn't exist.")
-		os.Exit(1)
 	}
 
 	if !Exists(filepath.Join(opts.Output, "index.html")) {
 		log.Fatal("<< ERROR >> index.html doesn't exist in " + opts.Output + ".")
-		os.Exit(1)
 	}
 
 	os.Mkdir(filepath.Join(opts.Output, "css"), 0777)
@@ -96,7 +94,7 @@ func main() {
 	markdownString := ""
 	isTopEmptyLines := true
 	for scanner.Scan() {
-		if cnt < opts.Removelines {
+		if cnt < opts.RemoveLines {
 			cnt++
 			continue
 		}
@@ -114,8 +112,7 @@ func main() {
 
 	markdownHtml := `
             <!-- https://github.com/hakimel/reveal.js/issues/929#issuecomment-80734215 -->
-            <!-- <section data-markdown data-separator="^\n---$" data-separator-vertical="^\n--\n$"> -->
-            <section data-markdown data-separator="^\n---$" data-separator-vertical="^\n--\n$">
+            <section data-markdown data-separator="^\n` + opts.DataSeparator + `$" data-separator-vertical="^\n` + opts.DataSeparatorVertical + `$">
                 <textarea data-template>
 ` + markdownString + `
                 </textarea>
@@ -147,7 +144,6 @@ func doCopyDir(src string, dest string) {
 	files, err := ioutil.ReadDir(src)
 	if err != nil {
 		log.Fatal("<< ERROR >> " + src + " doesn't exist.")
-		os.Exit(1)
 	}
 
 	for _, file := range files {
@@ -161,7 +157,6 @@ func doCopyDir(src string, dest string) {
 			bytes, err := ioutil.ReadFile(srcFilePath)
 			if err != nil {
 				log.Fatal("<< ERROR >> " + srcFilePath + " cannot read.")
-				os.Exit(1)
 			}
 			ioutil.WriteFile(destFilePath, bytes, 0777)
 		}

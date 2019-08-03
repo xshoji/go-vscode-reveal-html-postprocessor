@@ -14,14 +14,31 @@ As a result, your presentation will be distributable to others.
 
 # Usage
 
-1. Export html and css, js files by vscode-reveal
-2. post process by [go-vscode-reveal-html-postprocessor](https://github.com/xshoji/go-vscode-reveal-html-postprocessor/releases)
+1. Export html and css, js files by vscode-reveal.
+2. Post-process by [go-vscode-reveal-html-postprocessor](https://github.com/xshoji/go-vscode-reveal-html-postprocessor/releases).
 
 ```
 $ ./go-vscode-reveal-html-postprocessor -i /path/to/markdown.md -o /path/to/export
 ```
 
 3. Open index.html then you will be able to start your presentation on browser!
+
+```
+Usage:
+  go-vscode-reveal-html-postprocessor [OPTIONS]
+
+Application Options:
+  -i, --input=                 [ required ] An input markdown file path.
+  -o, --output=                [ required ] An output html directory that exported by vscode-reveal.
+  -r, --removeLines=           Remove top lines of the markdown file. (default: 7)
+  -d, --dataSeparator=         The data-separator. (default: ---)
+  -v, --dataSeparatorVertical= The data-separator-vertical. (default: --)
+  -m, --imageDir=              An image file directory.
+
+Help Options:
+  -h, --help                   Show this help message
+```
+
 
 # Build requirement
 

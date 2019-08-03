@@ -46,13 +46,6 @@ func main() {
 	fmt.Println("input: ", opts.Input)
 	fmt.Println("output: ", opts.Output)
 
-	minCss, _ := box.Find("css/font-awesome.min.css")
-	webFontSvg, _ := box.Find("fonts/fontawesome-webfont.svg")
-	otf, _ := box.Find("fonts/FontAwesome.otf")
-	webfontWoff2, _ := box.Find("fonts/fontawesome-webfont.woff2")
-	webfontWoff, _ := box.Find("fonts/fontawesome-webfont.woff")
-	webfontEot, _ := box.Find("fonts/fontawesome-webfont.eot")
-
 	if !strings.HasSuffix(opts.Input, ".md") {
 		log.Fatal("<< ERROR >> " + opts.Input + " is not markdown file.")
 	}
@@ -71,12 +64,13 @@ func main() {
 
 	makeDirectory(filepath.Join(opts.Output, "css"))
 	makeDirectory(filepath.Join(opts.Output, "fonts"))
-	writeFile(filepath.Join(opts.Output, "css", "font-awesome.min.css"), minCss)
-	writeFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.svg"), webFontSvg)
-	writeFile(filepath.Join(opts.Output, "fonts", "FontAwesome.otf"), otf)
-	writeFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.woff2"), webfontWoff2)
-	writeFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.woff"), webfontWoff)
-	writeFile(filepath.Join(opts.Output, "fonts", "fontawesome-webfont.eot"), webfontEot)
+
+	copyFileFromBox("css/font-awesome.min.css", filepath.Join(opts.Output, "css", "font-awesome.min.css"))
+	copyFileFromBox("fonts/fontawesome-webfont.svg", filepath.Join(opts.Output, "fonts", "fontawesome-webfont.svg"))
+	copyFileFromBox("fonts/FontAwesome.otf", filepath.Join(opts.Output, "fonts", "FontAwesome.otf"))
+	copyFileFromBox("fonts/fontawesome-webfont.woff2", filepath.Join(opts.Output, "fonts", "fontawesome-webfont.woff2"))
+	copyFileFromBox("fonts/fontawesome-webfont.woff", filepath.Join(opts.Output, "fonts", "fontawesome-webfont.woff"))
+	copyFileFromBox("fonts/fontawesome-webfont.eot", filepath.Join(opts.Output, "fonts", "fontawesome-webfont.eot"))
 
 	htmlBytes, _ := ioutil.ReadFile(filepath.Join(opts.Output, "index.html"))
 	html := string(htmlBytes)
@@ -86,7 +80,7 @@ func main() {
 
 	file, err := os.Open(opts.Input)
 	if err != nil {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	scanner := bufio.NewScanner(file)
@@ -107,7 +101,7 @@ func main() {
 	}
 
 	if err := scanner.Err(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	markdownHtml := `
@@ -138,6 +132,11 @@ func writeFile(path string, contentBytes []byte) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func copyFileFromBox(boxPath string, outputPath string) {
+	bytes, _ := box.Find(boxPath)
+	writeFile(outputPath, bytes)
 }
 
 func exists(name string) bool {

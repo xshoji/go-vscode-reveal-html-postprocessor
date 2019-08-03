@@ -8,6 +8,9 @@ As a result, your presentation will be distributable to others.
 # User requirement
 
  - vscode-reveal 3.3.2
+   - 1. [download vscode-reveal 3.3.2](https://evilz.gallery.vsassets.io/_apis/public/gallery/publisher/evilz/extension/vscode-reveal/3.3.2/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage)
+   - 2. `mv Microsoft.VisualStudio.Services.VSIXPackage Microsoft.VisualStudio.Services.VSIX`
+   - 3. Start Visual Studio Code, then F1 -> `Extensions: Install from VSIX...`
 
 # Usage
 

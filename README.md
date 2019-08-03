@@ -45,9 +45,14 @@ Help Options:
 # Build requirement
 
  - dep
- - packr
+ - packr v1.30.1
  - goreleaser
  - go 1.12
+
+```
+// build
+goreleaser --snapshot --skip-publish --rm-dist
+```
 
 # Release
 
